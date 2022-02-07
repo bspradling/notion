@@ -1,7 +1,7 @@
 use crate::ids::{BlockId, DatabaseId};
 use crate::models::error::ErrorResponse;
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Block, Database, ListResponse, Object, Page};
+use crate::models::{Block, Database, ListResponse, Object, CreatePageRequest, Page};
 use ids::AsIdentifier;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
@@ -200,6 +200,17 @@ impl NotionApi {
 
         match result {
             Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    pub async fn create_page<T: Into<CreatePageRequest>>(&self, page: T) -> Result<Page, Error> {
+        let result = self.make_json_request(self.client.post(
+            "https://api.notion.com/v1/pages"
+        ).json(&page.into())).await?;
+
+        match result {
+            Object::Page { page} => Ok(page),
             response => Err(Error::UnexpectedResponse { response }),
         }
     }

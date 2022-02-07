@@ -195,6 +195,11 @@ pub struct SelectedValue {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct CreatedSelectedValue {
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum DateOrDateTime {
     Date(NaiveDate),
@@ -219,7 +224,7 @@ pub enum FormulaResultValue {
     Date { date: Option<DateValue> },
 }
 
-/// Relation property value objects contain an array of page references within the relation property.
+/// Relation property value objects a page reference.
 /// A page reference is an object with an id property,
 /// with a string value (UUIDv4) corresponding to a page ID in another database.
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -281,12 +286,12 @@ pub enum PropertyValue {
     /// <https://developers.notion.com/reference/page#formula-property-values>
     Formula {
         id: PropertyId,
-        formula: FormulaResultValue,
+        formula: Option<FormulaResultValue>,
     },
     /// <https://developers.notion.com/reference/page#relation-property-values>
     Relation {
         id: PropertyId,
-        relation: RelationValue,
+        relation: Vec<RelationValue>,
     },
     Rollup {
         id: PropertyId,
@@ -298,7 +303,7 @@ pub enum PropertyValue {
     },
     Files {
         id: PropertyId,
-        files: Option<Vec<FileReference>>,
+        files: Vec<FileReference>,
     },
     Checkbox {
         id: PropertyId,
@@ -306,7 +311,7 @@ pub enum PropertyValue {
     },
     Url {
         id: PropertyId,
-        url: String,
+        url: Option<String>,
     },
     Email {
         id: PropertyId,
@@ -314,7 +319,7 @@ pub enum PropertyValue {
     },
     PhoneNumber {
         id: PropertyId,
-        phone_number: String,
+        phone_number: Option<String>,
     },
     CreatedTime {
         id: PropertyId,
@@ -333,3 +338,74 @@ pub enum PropertyValue {
         last_edited_by: User,
     },
 }
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum CreatePropertyValueRequest {
+    // <https://developers.notion.com/reference/page#title-property-values>
+    Title {
+        title: Vec<RichText>,
+    },
+    /// <https://developers.notion.com/reference/page#rich-text-property-values>
+    #[serde(rename = "rich_text")]
+    Text {
+        rich_text: Vec<RichText>,
+    },
+    /// <https://developers.notion.com/reference/page#number-property-values>
+    Number {
+        number: Number,
+    },
+    /// <https://developers.notion.com/reference/page#select-property-values>
+    Select {
+        select: CreatedSelectedValue,
+    },
+    MultiSelect {
+        multi_select: Vec<CreatedSelectedValue>,
+    },
+    Date {
+        date: DateValue,
+    },
+    /// <https://developers.notion.com/reference/page#formula-property-values>
+    Formula {
+        formula: FormulaResultValue,
+    },
+    /// <https://developers.notion.com/reference/page#relation-property-values>
+    Relation {
+        relation: RelationValue,
+    },
+    Rollup {
+        relation: Rollup,
+    },
+    People {
+        people: Vec<User>,
+    },
+    Files {
+        files: Vec<FileReference>,
+    },
+    Checkbox {
+        checkbox: bool,
+    },
+    Url {
+        url: String,
+    },
+    Email {
+        email: String,
+    },
+    PhoneNumber {
+        phone_number: String,
+    },
+    CreatedTime {
+        created_time: DateTime<Utc>,
+    },
+    CreatedBy {
+        created_by: User,
+    },
+    LastEditedTime {
+        last_edited_time: DateTime<Utc>,
+    },
+    LastEditedBy {
+        last_edited_by: User,
+    },
+}
+

@@ -5,7 +5,7 @@ pub mod search;
 pub mod text;
 pub mod users;
 
-use crate::models::properties::{PropertyConfiguration, PropertyValue};
+use crate::models::properties::{PropertyConfiguration, PropertyValue, CreatePropertyValueRequest};
 use crate::models::text::RichText;
 use crate::Error;
 use serde::{Deserialize, Serialize};
@@ -162,9 +162,24 @@ pub enum Parent {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum Icon {
+    Emoji {
+        emoji: String,
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Properties {
     #[serde(flatten)]
     pub properties: HashMap<String, PropertyValue>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct CreatePropertiesRequest {
+    #[serde(flatten)]
+    pub properties: HashMap<String, CreatePropertyValueRequest>,
 }
 
 impl Properties {
@@ -189,6 +204,15 @@ pub struct Page {
     pub archived: bool,
     pub properties: Properties,
     pub parent: Parent,
+    pub icon: Option<Icon>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct CreatePageRequest {
+    pub properties: CreatePropertiesRequest,
+    pub parent: Parent,
+    pub icon: Icon,
+    pub children: Vec<Block>,
 }
 
 impl Page {
